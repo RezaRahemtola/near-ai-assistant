@@ -9,5 +9,6 @@ python -m venv venv
 python -m pip install poetry
 poetry install
 
-# TODO: start the project
+# Start the project
+python src/main.py
 ```
