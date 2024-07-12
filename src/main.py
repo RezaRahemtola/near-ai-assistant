@@ -1,11 +1,19 @@
 import asyncio
 
+from agent.agent import Agent
 from logger import logger
+from config import env
+
+try:
+    AGENT = Agent(env.ai_config)
+except Exception as e:
+    logger.error(f"An error occurred during setup: {e}")
 
 async def entrypoint():
     try:
         logger.debug("Starting...")
-        # TODO: logic
+        async for answer in AGENT.yield_response("How are you?"):
+            logger.info(f"Response: {answer}")
     except Exception as e:
         logger.error(f"An error occured: {e}")
     finally:
