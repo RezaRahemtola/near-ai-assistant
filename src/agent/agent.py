@@ -1,16 +1,20 @@
+import aiohttp
+
 from logger import logger
 
 
 class Agent:
-    def __init__(self, ai_config: dict):
+    def __init__(self, config: dict):
         # Model
-        self.model_api_url = ai_config["model"]["api_url"]
-        self.model_engine = ai_config["model"]["engine"]
-
-        self.max_prompt_tokens = ai_config["model"]["max_prompt_tokens"]
+        self.model_api_url = config["model"]["api_url"]
+        self.max_prompt_tokens = config["model"]["max_prompt_tokens"]
+        self.max_completion_tokens = config["model"]["max_completion_tokens"]
+        self.temperature = config["model"]["temperature"]
+        self.top_p = config["model"]["top_p"]
+        self.top_k = config["model"]["top_k"]
 
         # Agent
-        self.max_recurse_depth = ai_config["agent"]["max_recurse_depth"]
+        self.max_recurse_depth = config["agent"]["max_recurse_depth"]
 
     async def generate_prompt(self, _message: str) -> str:
         """Generate the prompt within the model's context window"""
@@ -21,6 +25,38 @@ class Agent:
         # TODO: prompt with Near context
 
         return f"{system_prompt}"
+
+    async def complete(self, prompt: str) -> tuple[str, int]:
+        """Complete on a prompt with the model"""
+
+        session = aiohttp.ClientSession()
+        slot_id = -1
+
+        params = {
+            "prompt": prompt,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "top_k": self.top_k,
+
+            # llamacpp config
+            "n_predict": self.max_completion_tokens,
+            "id_slot": slot_id,
+            "slot_id": slot_id,
+            "typical_p": 1,
+            "tfs_z": 1,
+            "cache_prompt": True,
+            "use_default_badwordsids": False,
+        }
+
+        async with session.post(self.model_api_url, json=params) as response:
+            if response.status == 200:
+                response_data = await response.json()
+                result = response_data["content"]
+                await session.close()
+                return result
+            else:
+                raise RuntimeError(f"Agent::complete: Request failed: {response.status}")
+
 
     async def yield_response(self, message: str):
         """Yield a string containing the agent response"""
@@ -35,10 +71,7 @@ class Agent:
 
         while recurse_depth < self.max_recurse_depth:
             # Actually do the completion
-
-            # TODO: real completion
-            # completion = await self.complete(prompt)
-            completion = "Hello world!"
+            completion = await self.complete(prompt)
 
             logger.debug(f"Agent::yield_response(): completion: {completion}")
 
