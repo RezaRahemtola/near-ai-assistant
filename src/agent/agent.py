@@ -1,26 +1,29 @@
 import aiohttp
 
 from logger import logger
+from .prompt import PromptGenerator
 
 
 class Agent:
     def __init__(self, config: dict):
         # Model
-        self.model_api_url = config["model"]["api_url"]
-        self.max_prompt_tokens = config["model"]["max_prompt_tokens"]
-        self.max_completion_tokens = config["model"]["max_completion_tokens"]
-        self.temperature = config["model"]["temperature"]
-        self.top_p = config["model"]["top_p"]
-        self.top_k = config["model"]["top_k"]
+        self.model_api_url: str = config["model"]["api_url"]
+        self.max_prompt_tokens: int = config["model"]["max_prompt_tokens"]
+        self.max_completion_tokens: int = config["model"]["max_completion_tokens"]
+        self.temperature: float = config["model"]["temperature"]
+        self.top_p: float = config["model"]["top_p"]
+        self.top_k: float = config["model"]["top_k"]
 
         # Agent
-        self.max_recurse_depth = config["agent"]["max_recurse_depth"]
+        self.max_recurse_depth: int = config["agent"]["max_recurse_depth"]
+
+        # Utils
+        self.prompt_generator = PromptGenerator(config)
 
     async def generate_prompt(self, _message: str) -> str:
         """Generate the prompt within the model's context window"""
 
-        # TODO: system prompt
-        system_prompt = "You are an AI agent."
+        system_prompt, _tokens_used = self.prompt_generator.system_prompt(self.max_prompt_tokens)
 
         # TODO: prompt with Near context
 
@@ -85,10 +88,7 @@ class Agent:
             finally:
                 # If there's nothing to do, return the completion
                 if tool_message is None:
-
-                    logger.info(
-                        f"Agent::yield_response: recusion_depth: {recurse_depth}"
-                    )
+                    logger.debug(f"Agent::yield_response: recursion_depth: {recurse_depth}")
                     yield completion
                     return
 

@@ -13,3 +13,9 @@ model:
 agent:
   # Max number of times the agent can call itself back
   max_recurse_depth: 3
+  system_prompt_template: "config/system_prompt.yaml"
+
+# ChatML config
+chat_ml:
+  user_prepend: "<|im_start|>"
+  user_append: "<|im_end|>"
