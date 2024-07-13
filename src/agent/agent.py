@@ -2,6 +2,7 @@ import aiohttp
 
 from logger import logger
 from .prompt import PromptGenerator
+from .tools import ToolsHandler
 
 
 class Agent:
@@ -19,13 +20,14 @@ class Agent:
 
         # Utils
         self.prompt_generator = PromptGenerator(config)
+        self.tools_handler = ToolsHandler()
 
     async def generate_prompt(self, message: str) -> str:
         """Generate the prompt within the model's context window"""
 
         system_prompt, used_system_tokens = self.prompt_generator.system_prompt(self.max_prompt_tokens)
 
-        user_prompt = self.prompt_generator.user_prompt(
+        user_prompt, _used_user_tokens = self.prompt_generator.user_prompt(
             message, token_limit=self.max_prompt_tokens - used_system_tokens
         )
 
@@ -82,15 +84,13 @@ class Agent:
 
             tool_message = None
             try:
-                # TODO: tool calls
-                _tmp = 42
+                tool_message = self.tools_handler.complete(completion, self.max_recurse_depth)
             except Exception as e:
                 logger.warn(f"An error occured on tools completion {e}")
                 raise e
             finally:
                 # If there's nothing to do, return the completion
                 if tool_message is None:
-                    logger.debug(f"Agent::yield_response: recursion_depth: {recurse_depth}")
                     yield completion
                     return
 
@@ -102,8 +102,6 @@ class Agent:
                 # TODO: generate tool message, and generate prompt again with it
                 # prompt = f"{prompt}{completion}{tool_message}"
 
-                logger.debug(
-                    f"Agent::yield_response: doing recursion on prompt: {prompt}"
-                )
+                logger.debug(f"Agent::yield_response: doing recursion on prompt: {prompt}")
 
                 yield "Loading..."

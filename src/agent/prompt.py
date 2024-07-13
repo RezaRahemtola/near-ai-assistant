@@ -1,14 +1,17 @@
 import datetime
 from pydantic import BaseModel
 import yaml
+import json
 
 from .utils import calculate_token_length
+from .tools import get_tools, ToolCallSchema
 
 class SystemPromptSchema(BaseModel):
     """Description of the agent's system prompt"""
 
     Role: str
     Objective: str
+    Tools: str
 
 
 class PromptGenerator:
@@ -25,7 +28,8 @@ class PromptGenerator:
             yaml_content = yaml.safe_load(system_prompt_file)
             self.system_prompt_schema = SystemPromptSchema(
                 Role=yaml_content.get("Role", ""),
-                Objective=yaml_content.get("Objective", "")
+                Objective=yaml_content.get("Objective", ""),
+                Tools=yaml_content.get("Tools", ""),
             )
 
     def system_prompt(self, token_limit: int) -> tuple[str, int]:
@@ -33,7 +37,9 @@ class PromptGenerator:
 
         date = datetime.datetime.now().strftime("%A, %B %d, %Y @ %H:%M:%S")
         variables = {
-            "date": date
+            "date": date,
+            "tools": get_tools(),
+            "tool_schema": json.dumps(ToolCallSchema.model_json_schema()),
         }
 
         system_prompt = ""
