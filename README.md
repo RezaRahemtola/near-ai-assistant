@@ -2,18 +2,25 @@
 
 ETHGlobal Brussels 2024
 
-## Installation
+## ⚙️ Installation
 
+Setup your environment with these commands:
 ```shell
 python -m venv venv
 python -m pip install poetry
 poetry install
+```
 
-# Start the project
+Then you can create a `.env` file and fill it with values inspired from the [`.env.example`](.env.example) file.
+
+## 🚀 Getting started
+
+Now you're only one command away from using your Near AI assistant 🔥
+```shell
 python src/main.py
 ```
 
-## Miscellaneous
+## ➕ Miscellaneous
 
 Other things I have used / fixed related to Near during this hackathon
 
