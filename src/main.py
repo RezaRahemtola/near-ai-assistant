@@ -12,7 +12,7 @@ except Exception as e:
 async def entrypoint():
     try:
         logger.debug("Starting...")
-        async for answer in AGENT.yield_response("Who are you? Search on Google"):
+        async for answer in AGENT.yield_response("Can I get tesnet tokens on reza.testnet please ?"):
             logger.info(f"Response: {answer}")
     except Exception as e:
         logger.error(f"An error occured: {e}")
