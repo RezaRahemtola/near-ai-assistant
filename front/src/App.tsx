@@ -8,33 +8,38 @@ import {
 	MDBIcon,
 	MDBRow,
 } from "mdb-react-ui-kit";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import socket from "./socket";
 
 type MessageAuthor = "user" | "ai";
 
 type MessageGroup = {
+	id: string;
 	author: MessageAuthor;
-	values: string[];
+	messages: { id: string; content: string }[];
 };
 
 export default function App() {
 	const [inputValue, setInputValue] = useState("");
 	const [messageGroups, setMessageGroups] = useState<MessageGroup[]>([]);
+	const messageGroupsRef = useRef<MessageGroup[]>([]);
+	messageGroupsRef.current = messageGroups;
 
 	const addNewMessage = (author: MessageAuthor, content: string) => {
-		console.log(messageGroups);
-		if (messageGroups.length > 0) {
-			const lastMessageGroup = messageGroups[messageGroups.length - 1];
-			console.log(lastMessageGroup);
+		const groups = messageGroupsRef.current;
+		if (groups.length > 0) {
+			const lastMessageGroup = { ...groups[groups.length - 1] };
 			if (lastMessageGroup.author === author) {
-				console.log("same group");
-				lastMessageGroup.values.push(content);
-				setMessageGroups(messageGroups);
+				lastMessageGroup.messages.push({ content, id: uuidv4() });
+				setMessageGroups((oldGroups) => [...oldGroups.slice(0, -1), lastMessageGroup]);
 				return;
 			}
 		}
-		setMessageGroups((oldMessageGroups) => [...oldMessageGroups, { author, values: [content] }]);
+		setMessageGroups((oldMessageGroups) => [
+			...oldMessageGroups,
+			{ author, messages: [{ content, id: uuidv4() }], id: uuidv4() },
+		]);
 	};
 
 	const onSubmitMessage = () => {
@@ -73,10 +78,12 @@ export default function App() {
 									{messageGroups.map((messageGroup) => {
 										if (messageGroup.author === "user") {
 											return (
-												<div className="d-flex flex-row justify-content-end mb-4 pt-1">
+												<div className="d-flex flex-row justify-content-end mb-4 pt-1" key={messageGroup.id}>
 													<div>
-														{messageGroup.values.map((message) => (
-															<p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">{message}</p>
+														{messageGroup.messages.map((message) => (
+															<p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary" key={message.id}>
+																{message.content}
+															</p>
 														))}
 													</div>
 													<img
@@ -89,16 +96,20 @@ export default function App() {
 										}
 
 										return (
-											<div className="d-flex flex-row justify-content-start mb-4">
+											<div className="d-flex flex-row justify-content-start mb-4" key={messageGroup.id}>
 												<img
 													src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
 													alt="avatar 1"
 													style={{ width: "45px", height: "100%" }}
 												/>
 												<div>
-													{messageGroup.values.map((message) => (
-														<p className="small p-2 ms-3 mb-1 rounded-3" style={{ backgroundColor: "#f5f6f7" }}>
-															{message}
+													{messageGroup.messages.map((message) => (
+														<p
+															className="small p-2 ms-3 mb-1 rounded-3"
+															style={{ backgroundColor: "#f5f6f7" }}
+															key={message.id}
+														>
+															{message.content}
 														</p>
 													))}
 												</div>
