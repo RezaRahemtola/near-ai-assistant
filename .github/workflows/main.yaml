@@ -1,0 +1,81 @@
+name: Main workflow
+
+on: [ push ]
+
+jobs:
+  build:
+    name: "Front: Build"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: 'front/yarn.lock'
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+  lint:
+    name: "Front: Lint"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: 'front/yarn.lock'
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run ESLint
+        run: yarn lint > eslint-results
+
+      - name: Get eslint results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: eslint-results
+          path: eslint-results
+          retention-days: 5
+
+  format:
+    name: "Front: Format"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: 'front/yarn.lock'
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run Prettier
+        run: yarn format
