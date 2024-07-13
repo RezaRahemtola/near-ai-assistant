@@ -3,6 +3,7 @@ import aiohttp
 from logger import logger
 from .prompt import PromptGenerator
 from .tools import ToolsHandler
+from .utils import calculate_token_length
 
 
 class Agent:
@@ -16,7 +17,9 @@ class Agent:
         self.top_k: float = config["model"]["top_k"]
 
         # Agent
+        self.max_completion_tries = config["agent"]["max_completion_tries"]
         self.max_recurse_depth: int = config["agent"]["max_recurse_depth"]
+        self.stop_sequences = config["chat_ml"]["stop_sequences"]
 
         # Utils
         self.prompt_generator = PromptGenerator(config)
@@ -37,7 +40,6 @@ class Agent:
         """Complete on a prompt with the model"""
 
         session = aiohttp.ClientSession()
-        slot_id = -1
 
         params = {
             "prompt": prompt,
@@ -45,24 +47,39 @@ class Agent:
             "top_p": self.top_p,
             "top_k": self.top_k,
 
-            # llamacpp config
+            # llamacpp params
             "n_predict": self.max_completion_tokens,
-            "id_slot": slot_id,
-            "slot_id": slot_id,
             "typical_p": 1,
             "tfs_z": 1,
+            "stop": self.stop_sequences,
             "cache_prompt": True,
             "use_default_badwordsids": False,
         }
 
-        async with session.post(self.model_api_url, json=params) as response:
-            if response.status == 200:
-                response_data = await response.json()
-                result = response_data["content"]
-                await session.close()
-                return result
-            else:
-                raise RuntimeError(f"Agent::complete: Request failed: {response.status}")
+        tries = 0
+        errors = []
+        full_result = ""
+        result = ""
+        while tries < self.max_completion_tries:
+            # Append the compound result to the prompt
+            params["prompt"] = f"{params['prompt']}{result}"
+            try:
+                async with session.post(self.model_api_url, json=params) as response:
+                    if response.status == 200:
+                        response_data = await response.json()
+                        result = response_data["content"]
+                        full_result = f"{full_result}{result}"
+                        token_count = calculate_token_length(full_result)
+                        await session.close()
+                        return full_result, token_count
+                    else:
+                        raise RuntimeError(f"Agent::complete: Request failed: {response.status}")
+            except Exception as e:
+                logger.debug(f"Agent::complete: Error completing prompt: {e}")
+                errors.append(e)
+            finally:
+                tries += 1
+        raise RuntimeError(f"Agent::complete: Failed to complete prompt: {errors}")
 
 
     async def yield_response(self, message: str):
@@ -78,7 +95,7 @@ class Agent:
 
         while recurse_depth < self.max_recurse_depth:
             # Actually do the completion
-            completion = await self.complete(prompt)
+            completion, _tokens = await self.complete(prompt)
 
             logger.debug(f"Agent::yield_response: completion: {completion}")
 
@@ -99,8 +116,10 @@ class Agent:
                 if recurse_depth >= self.max_recurse_depth:
                     raise RecursionError("Function call depth exceeded")
 
-                # TODO: generate tool message, and generate prompt again with it
-                # prompt = f"{prompt}{completion}{tool_message}"
+                tool_message = self.prompt_generator.tool_prompt(tool_message)
+
+                # TODO: real max tokens with already used ones
+                prompt, _ = self.prompt_generator.user_prompt(f"{prompt}{completion}{tool_message}", self.max_prompt_tokens)
 
                 logger.debug(f"Agent::yield_response: doing recursion on prompt: {prompt}")
 

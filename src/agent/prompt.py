@@ -17,8 +17,6 @@ class SystemPromptSchema(BaseModel):
 class PromptGenerator:
     def __init__(self, config: dict):
         # Chat ML config
-        self.sys_prepend = config["chat_ml"]["sys_prepend"]
-        self.sys_append = config["chat_ml"]["sys_append"]
         self.user_prepend = config["chat_ml"]["user_prepend"]
         self.user_append = config["chat_ml"]["user_append"]
         self.line_separator = "\n"
@@ -38,7 +36,7 @@ class PromptGenerator:
         date = datetime.datetime.now().strftime("%A, %B %d, %Y @ %H:%M:%S")
         variables = {
             "date": date,
-            "tools": get_tools(),
+            "tools": json.dumps(get_tools()),
             "tool_schema": json.dumps(ToolCallSchema.model_json_schema()),
         }
 
@@ -48,7 +46,7 @@ class PromptGenerator:
             formatted_value = formatted_value.replace("\n", " ")
             system_prompt += f"{formatted_value}"
 
-        system_prompt = f"{self.sys_prepend}{system_prompt}{self.sys_append}{self.line_separator}"
+        system_prompt = f"{self.user_prepend}SYSTEM{self.line_separator}{system_prompt}{self.user_append}{self.line_separator}"
 
         used_tokens = calculate_token_length(system_prompt)
 
@@ -60,7 +58,7 @@ class PromptGenerator:
     def user_prompt(self, message: str, token_limit: int) -> tuple[str, int]:
         """Build the prompt with user message"""
 
-        prompt = f"{self.user_prepend}{message}{self.sys_append}{self.line_separator}"
+        prompt = f"{message}{self.user_prepend}{"assistant"}{self.line_separator}"
 
         used_tokens = calculate_token_length(prompt)
 
@@ -68,3 +66,6 @@ class PromptGenerator:
             raise OverflowError("PromptGenerator::user_prompt: exceeding token limit")
 
         return prompt, used_tokens
+
+    def tool_prompt(self, tool_message: str) -> str:
+        return f"{self.line_separator}{self.user_append}{self.line_separator}{self.user_prepend}tool{self.line_separator}{tool_message}{self.user_append}{self.line_separator}"
