@@ -4,6 +4,7 @@ from langchain.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from py_near.account import Account
 from py_near.dapps.core import NEAR
+from py_near.providers import JsonProvider
 
 from config import env
 
@@ -86,7 +87,20 @@ async def mint_near_nft_raw(receiver: str) -> str:
     else:
         return "An unknown error occured"
 
-TOOLS = [get_testnet_tokens, google_search, mint_near_nft]
+@tool()
+def get_near_transaction_info(tx_hash: str, sender_account: str):
+    """Get information about a Near transaction
+    Args:
+        tx_hash (str): Hash of the transaction
+        sender_account (str): Account that sent the transaction"""
+
+async def get_near_transaction_info_raw(tx_hash: str, sender_account: str):
+    near_provider = JsonProvider(env.near_rpc_url)
+
+    tx = await near_provider.json_rpc("EXPERIMENTAL_tx_status", [tx_hash, sender_account])
+    return tx
+
+TOOLS = [get_testnet_tokens, google_search, mint_near_nft, get_near_transaction_info]
 
 def get_tools() -> list:
     return [convert_to_openai_tool(t) for t in TOOLS]
