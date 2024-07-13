@@ -1,7 +1,12 @@
 import json
-import re
+import os
+import sys
 
 from logger import logger
+from .functions import get_tools
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+import functions
 
 def parse_json(message: str):
     message = message[next(i for i, char in enumerate(message) if char in "{["):]
@@ -12,8 +17,7 @@ def parse_json(message: str):
 
 class ToolsHandler:
     def __init__(self):
-        # TODO: fetch tools with a function
-        self.tools = []
+        self.tools = get_tools()
         self.line_separator = "\n"
 
 
@@ -29,14 +33,30 @@ class ToolsHandler:
 
         return tool_calls
 
+    def execute_tool_call(self, tool_call: dict) -> str:
+        function_name = tool_call.get("name")
+        # TODO: Not working without this _raw, try to fix it later
+        function_to_call = getattr(functions, f"{function_name}_raw", None)
+        function_args = tool_call.get("arguments", {})
+        logger.debug(f"ToolsHandler::execute_tool_call: {function_name} with {function_args}")
+
+        if not function_to_call:
+            raise ValueError(f"Function {function_name} not found")
+
+        function_response = function_to_call(*function_args.values())
+        results = f'{{"name": "{function_name}", "content": {function_response}}}'
+        return results
+
     def complete(self, message: str, depth: int) -> str | None:
         tool_calls = self.extract_tool_calls(message)
         tool_message = f"Current call depth: {depth}{self.line_separator}"
         if len(tool_calls) > 0:
-            tool_message += f"<tool_response>{self.line_separator}{"NearBot is a French AI agent to help with user queries"}{self.line_separator}</tool_response>{self.line_separator}"
-            return tool_message
-        # TODO: handle errors in this elif
-        elif False:
-            tool_message += f"<tool_response>{self.line_separator}There was an error parsing function calls{self.line_separator}Here's the error stack trace: {error_message}{self.line_separator}Please call the function again with correct syntax within XML tags <tool_call></tool_call>{self.line_separator}</tool_response>{self.line_separator}"
+            for tool_call in tool_calls:
+                try:
+                    function_response = self.execute_tool_call(tool_call)
+                    tool_message += f"<tool_response>{self.line_separator}{function_response}{self.line_separator}</tool_response>{self.line_separator}"
+                except Exception as e:
+                    tool_name = tool_call.get("name")
+                    tool_message += f"<tool_response>{self.line_separator}There was an error when executing the function: {tool_name}{self.line_separator}Here's the error traceback: {e}{self.line_separator}Please call this function again with correct arguments within XML tags <tool_call></tool_call>{self.line_separator}</tool_response>{self.line_separator}"
             return tool_message
         return None
