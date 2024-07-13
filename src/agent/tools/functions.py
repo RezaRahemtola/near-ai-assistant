@@ -1,16 +1,17 @@
 import requests
-import json
-
+from requests.auth import HTTPBasicAuth
 from langchain.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
+from config import env
+
 @tool()
 def get_testnet_tokens(receiver: str):
-    """Send some Near testnet tokens to a Near receiver address
+    """Send some Near testnet tokens to a Near account
     Args:
         receiver (str): The receiver of the tokens
     Returns:
-        JSON response of the request that contains either a transaction hash (txh) or an error message (error)"""
+        String explaining what happened"""
 
 def get_testnet_tokens_raw(receiver: str):
     response = requests.post(
@@ -25,8 +26,28 @@ def get_testnet_tokens_raw(receiver: str):
     else:
         return f"An error occured: {error_message}"
 
+@tool()
+def google_search(query: str):
+    """Search Google results, call this if you need more information on a subject
+    Args:
+        query (str): The query to search for
+    Returns:
+        list: A list of dictionaries containing the title, link, snippet, and other information about the search results."""
 
-TOOLS = [get_testnet_tokens]
+def google_search_raw(query: str) -> list[dict]:
+    basic_auth = HTTPBasicAuth(env.oxylabs_username, env.oxylabs_password)
+
+    response = requests.post(
+        'https://realtime.oxylabs.io/v1/queries',
+        auth=basic_auth,
+        json={"source": "google_search", "query": query, "parse": True}
+    )
+
+    data = response.json()
+    return data.get('results')[0].get('content').get('results')
+
+
+TOOLS = [get_testnet_tokens, google_search]
 
 def get_tools() -> list:
     return [convert_to_openai_tool(t) for t in TOOLS]

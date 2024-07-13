@@ -21,7 +21,7 @@ class ToolsHandler:
         self.line_separator = "\n"
 
 
-    def extract_tool_calls(self, message: str) -> list:
+    def extract_tool_calls(self, message: str) -> list[dict]:
         tool_calls = []
 
         try:
@@ -47,8 +47,7 @@ class ToolsHandler:
         results = f'{{"name": "{function_name}", "content": {function_response}}}'
         return results
 
-    def complete(self, message: str, depth: int) -> str | None:
-        tool_calls = self.extract_tool_calls(message)
+    def complete(self, tool_calls: list[dict], depth: int) -> str | None:
         tool_message = f"Current call depth: {depth}{self.line_separator}"
         if len(tool_calls) > 0:
             for tool_call in tool_calls:

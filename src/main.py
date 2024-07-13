@@ -12,8 +12,12 @@ except Exception as e:
 async def entrypoint():
     try:
         logger.debug("Starting...")
-        async for answer in AGENT.yield_response("Can I get tesnet tokens on reza.testnet please ?"):
-            logger.info(f"Response: {answer}")
+        while True:
+            question = input("Enter your question: ")
+            async for answer in AGENT.yield_response(question):
+                print(f"Response: {answer}")
+    except KeyboardInterrupt:
+        print("\nSee you later!")
     except Exception as e:
         logger.error(f"An error occured: {e}")
     finally:
@@ -21,4 +25,7 @@ async def entrypoint():
 
 
 if __name__ == "__main__":
-    asyncio.run(entrypoint())
+    try:
+        asyncio.run(entrypoint())
+    except KeyboardInterrupt:
+        pass

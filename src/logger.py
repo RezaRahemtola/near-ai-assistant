@@ -13,6 +13,7 @@ class _Logger:
 
             # Hide other debug logs
             logging.getLogger("asyncio").setLevel(logging.WARNING)
+            logging.getLogger("urllib3").setLevel(logging.WARNING)
         else:
             logging.basicConfig(level=logging.INFO)
 
