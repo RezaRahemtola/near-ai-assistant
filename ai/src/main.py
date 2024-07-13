@@ -1,4 +1,5 @@
-import asyncio
+import socketio
+from aiohttp import web
 
 from agent.agent import Agent
 from logger import logger
@@ -9,23 +10,26 @@ try:
 except Exception as e:
     logger.error(f"An error occurred during setup: {e}")
 
-async def entrypoint():
+
+sio = socketio.AsyncServer(async_mode='aiohttp', async_handlers=True, cors_allowed_origins="*")
+app = web.Application()
+sio.attach(app)
+
+@sio.on('message')
+async def handle_message(sid, question: str):
+    print('Received message: ', question)
     try:
         logger.debug("Starting...")
-        while True:
-            question = input("Enter your question: ")
-            async for answer in AGENT.yield_response(question):
-                print(f"Response: {answer}")
-    except KeyboardInterrupt:
-        print("\nSee you later!")
+        async for answer in AGENT.yield_response(question):
+            await sio.emit('response', answer)
     except Exception as e:
         logger.error(f"An error occured: {e}")
     finally:
         logger.debug("Stopping...")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
-        asyncio.run(entrypoint())
+        web.run_app(app, host='0.0.0.0', port=3001)
     except KeyboardInterrupt:
         pass

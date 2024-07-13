@@ -8,9 +8,57 @@ import {
   MDBIcon,
   MDBRow
 } from "mdb-react-ui-kit";
+import { useEffect, useState } from "react";
+import socket from "./socket";
 
+type MessageAuthor =  "user" | "ai"
+
+type MessageGroup = {
+  author: MessageAuthor
+  values: string[]
+}
 
 export default function App() {
+  const [inputValue, setInputValue] = useState('');
+  const [messageGroups, setMessageGroups] = useState<MessageGroup[]>([])
+
+  const addNewMessage = (author: MessageAuthor, content: string) => {
+    const currentMessageGroups = [...messageGroups]
+    if (currentMessageGroups.length > 0) {
+      const currentMessageGroup = currentMessageGroups[currentMessageGroups.length - 1]
+      if (currentMessageGroup.author === author) {
+        currentMessageGroup.values.push(content)
+        setMessageGroups(currentMessageGroups)
+        return
+      }
+    }
+    setMessageGroups((oldMessageGroups) => [...oldMessageGroups, {author, values: [content]}])
+  }
+
+  const onSubmitMessage = () => {socket.emit("message", inputValue)
+
+    addNewMessage("user", inputValue)
+    setInputValue('')
+                  }
+
+
+  useEffect(() => {
+
+    socket.connect()
+
+    const onResponse = (value: string) => {
+addNewMessage("ai", value)
+
+    }
+
+    socket.on("response", onResponse)
+
+    return () => {
+      socket.off("response", onResponse)
+      socket.disconnect();
+    };
+  }, []);
+
   return (
     <MDBContainer fluid className="py-5" style={{ backgroundColor: "#eee" }}>
       <MDBRow className="d-flex justify-content-center">
@@ -23,151 +71,53 @@ export default function App() {
 
               <div className="ScrollbarsCustom-Content">
               <MDBCardBody>
-                <div className="d-flex flex-row justify-content-start">
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                  <div>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      Hi
-                    </p>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      How are you ...???
-                    </p>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      What are you doing tomorrow? Can we come up a bar?
-                    </p>
-                  </div>
-                </div>
+                {messageGroups.map((messageGroup) => {
+                  if (messageGroup.author === "user") {
+                    return <div className="d-flex flex-row justify-content-end mb-4 pt-1">
+                    <div>
+                      {messageGroup.values.map((message) => ( <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
+                        {message}
+                      </p>))}
+                    </div>
+                    <img
+                                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
 
-                <div className="d-flex flex-row justify-content-end mb-4 pt-1">
-                  <div>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      Hiii, I'm good.
-                    </p>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      How are you doing?
-                    </p>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      Long time no see! Tomorrow office. will be free on sunday.
-                    </p>
+                      alt="avatar 1"
+                      style={{ width: "45px", height: "100%" }}
+                    />
                   </div>
+                  }
+
+                  return <div className="d-flex flex-row justify-content-start mb-4">
                   <img
                     src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
                     alt="avatar 1"
                     style={{ width: "45px", height: "100%" }}
                   />
-                </div>
-
-                <div className="d-flex flex-row justify-content-start mb-4">
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
                   <div>
-                    <p
+                    {messageGroup.values.map((message) => ( <p
                       className="small p-2 ms-3 mb-1 rounded-3"
                       style={{ backgroundColor: "#f5f6f7" }}
                     >
-                      Okay
-                    </p>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      We will go on Sunday?
-                    </p>
+                        {message}
+                      </p>))}
                   </div>
-                </div>
+                  </div>
 
-                <div className="d-flex flex-row justify-content-end mb-4">
-                  <div>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      That's awesome!
-                    </p>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      I will meet you Sandon Square sharp at 10 AM
-                    </p>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      Is that okay?
-                    </p>
-                  </div>
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                </div>
 
-                <div className="d-flex flex-row justify-content-start mb-4">
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                  <div>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      Okay i will meet you on Sandon Square
-                    </p>
-                  </div>
-                </div>
 
-                <div className="d-flex flex-row justify-content-end mb-4">
-                  <div>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      Do you have pictures of Matley Marriage?
-                    </p>
-                  </div>
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                </div>
 
-                <div className="d-flex flex-row justify-content-start mb-4">
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                  <div>
-                    <p
-                      className="small p-2 ms-3 mb-1 rounded-3"
-                      style={{ backgroundColor: "#f5f6f7" }}
-                    >
-                      Sorry I don't have. i changed my phone.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="d-flex flex-row justify-content-end">
-                  <div>
-                    <p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary">
-                      Okay then see you on sunday!!
-                    </p>
-                  </div>
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                    alt="avatar 1"
-                    style={{ width: "45px", height: "100%" }}
-                  />
-                </div>
+
+
+
+
+
+
+
+
+                })}
+
               </MDBCardBody>
               </div>
               </div>
@@ -182,8 +132,14 @@ export default function App() {
                 className="form-control form-control-lg"
                 id="exampleFormControlInput1"
                 placeholder="Type message"
+                value={inputValue} onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSubmitMessage()
+                  }
+                  }}
               ></input>
-              <a className="ms-3" href="#!">
+              <a className="ms-3" href="#!" onClick={() => onSubmitMessage()}>
                 <MDBIcon fas icon="paper-plane" />
               </a>
             </MDBCardFooter>

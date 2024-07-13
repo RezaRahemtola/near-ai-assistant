@@ -14,7 +14,8 @@
     "mdb-ui-kit": "^7.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-scrollbars-custom": "^4.1.1"
+    "react-scrollbars-custom": "^4.1.1",
+    "socket.io-client": "^3"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

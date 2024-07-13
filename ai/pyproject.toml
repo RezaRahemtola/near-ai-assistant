@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Helper AI tools for Near"
 authors = ["Reza Rahemtola <reza.rahemtola@epitech.eu>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -14,6 +15,7 @@ pydantic = "^2.8.2"
 nltk = "^3.8.1"
 langchain = "^0.2.7"
 py-near = { git = "git@github.com:RezaRahemtola/py-near.git" }
+python-socketio = "^5.11.3"
 
 [build-system]
 requires = ["poetry-core"]
