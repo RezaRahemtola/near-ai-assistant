@@ -14,11 +14,13 @@ class SystemPromptSchema(BaseModel):
 class PromptGenerator:
     def __init__(self, config: dict):
         # Chat ML config
+        self.sys_prepend = config["chat_ml"]["sys_prepend"]
+        self.sys_append = config["chat_ml"]["sys_append"]
         self.user_prepend = config["chat_ml"]["user_prepend"]
         self.user_append = config["chat_ml"]["user_append"]
         self.line_separator = "\n"
 
-        # Persona Configuration and Templates
+        # System prompt
         with open(config["agent"]["system_prompt_template"], "r") as system_prompt_file:
             yaml_content = yaml.safe_load(system_prompt_file)
             self.system_prompt_schema = SystemPromptSchema(
@@ -40,7 +42,7 @@ class PromptGenerator:
             formatted_value = formatted_value.replace("\n", " ")
             system_prompt += f"{formatted_value}"
 
-        system_prompt = f"{self.user_prepend}SYSTEM{self.line_separator}{system_prompt}{self.user_append}{self.line_separator}"
+        system_prompt = f"{self.sys_prepend}{system_prompt}{self.sys_append}{self.line_separator}"
 
         used_tokens = calculate_token_length(system_prompt)
 
@@ -48,3 +50,15 @@ class PromptGenerator:
             raise OverflowError("PromptGenerator::system_prompt: exceeding token limit")
 
         return system_prompt, used_tokens
+
+    def user_prompt(self, message: str, token_limit: int) -> tuple[str, int]:
+        """Build the prompt with user message"""
+
+        prompt = f"{self.user_prepend}{message}{self.sys_append}{self.line_separator}"
+
+        used_tokens = calculate_token_length(prompt)
+
+        if used_tokens > token_limit:
+            raise OverflowError("PromptGenerator::user_prompt: exceeding token limit")
+
+        return prompt, used_tokens

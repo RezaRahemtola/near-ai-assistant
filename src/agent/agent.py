@@ -20,14 +20,16 @@ class Agent:
         # Utils
         self.prompt_generator = PromptGenerator(config)
 
-    async def generate_prompt(self, _message: str) -> str:
+    async def generate_prompt(self, message: str) -> str:
         """Generate the prompt within the model's context window"""
 
-        system_prompt, _tokens_used = self.prompt_generator.system_prompt(self.max_prompt_tokens)
+        system_prompt, used_system_tokens = self.prompt_generator.system_prompt(self.max_prompt_tokens)
 
-        # TODO: prompt with Near context
+        user_prompt = self.prompt_generator.user_prompt(
+            message, token_limit=self.max_prompt_tokens - used_system_tokens
+        )
 
-        return f"{system_prompt}"
+        return f"{system_prompt}{user_prompt}"
 
     async def complete(self, prompt: str) -> tuple[str, int]:
         """Complete on a prompt with the model"""
@@ -76,7 +78,7 @@ class Agent:
             # Actually do the completion
             completion = await self.complete(prompt)
 
-            logger.debug(f"Agent::yield_response(): completion: {completion}")
+            logger.debug(f"Agent::yield_response: completion: {completion}")
 
             tool_message = None
             try:
