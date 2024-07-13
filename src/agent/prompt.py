@@ -46,7 +46,7 @@ class PromptGenerator:
             formatted_value = formatted_value.replace("\n", " ")
             system_prompt += f"{formatted_value}"
 
-        system_prompt = f"{self.user_prepend}SYSTEM{self.line_separator}{system_prompt}{self.user_append}{self.line_separator}"
+        system_prompt = f"{self.user_prepend}system{self.line_separator}{system_prompt}{self.user_append}{self.line_separator}"
 
         used_tokens = calculate_token_length(system_prompt)
 
@@ -58,7 +58,7 @@ class PromptGenerator:
     def user_prompt(self, message: str, token_limit: int) -> tuple[str, int]:
         """Build the prompt with user message"""
 
-        prompt = f"{message}{self.user_prepend}{"assistant"}{self.line_separator}"
+        prompt = f"{self.user_prepend}user{self.line_separator}{message}{self.user_append}{self.line_separator}{self.user_prepend}assistant{self.line_separator}"
 
         used_tokens = calculate_token_length(prompt)
 

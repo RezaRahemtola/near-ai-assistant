@@ -127,4 +127,4 @@ class Agent:
 
                 logger.debug(f"Agent::yield_response: doing recursion on prompt: {prompt}")
 
-                yield "Loading..."
+                yield "Processing the gathered information..."

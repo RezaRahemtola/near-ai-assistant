@@ -46,7 +46,8 @@ async def google_search_raw(query: str) -> list[dict]:
     )
 
     data = response.json()
-    return data.get('results')[0].get('content').get('results')
+    organic_results = data.get('results')[0].get('content').get('results').get('organic')
+    return [{ "pos": r['pos'], "url": r['url'], "desc": r['desc'], "title": r['title'] } for r in organic_results]
 
 @tool()
 def mint_near_nft(receiver: str):
@@ -69,7 +70,7 @@ async def mint_near_nft_raw(receiver: str) -> str:
             "token_id": str(len(existing_nfts.result)),  # Generating a new ID incrementally
             "receiver_id": receiver,
             "token_metadata": {
-            "title": "AI NFT",
+            "title": "AI minted NFT",
                 "description": "Hello World from nearaibot.testnet!",
                 "media": "https://ipfs.io/ipfs/QmQMZcwxrYF499EL1gvJ5Anw4UqAugoYv5XmQwmnoFS3eM",
                 "copies": 1

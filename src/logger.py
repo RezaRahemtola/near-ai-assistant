@@ -8,16 +8,12 @@ class _Logger:
     def __init__(self, debug=False):
         logger = logging.getLogger(__name__)
 
-        if debug:
-            logging.basicConfig(level=logging.DEBUG)
-
-            # Hide other debug logs
-            logging.getLogger("asyncio").setLevel(logging.WARNING)
-            logging.getLogger("urllib3").setLevel(logging.WARNING)
-            logging.getLogger("httpx").setLevel(logging.WARNING)
-            logging.getLogger("httpcore").setLevel(logging.WARNING)
-        else:
-            logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+        # Hide other debug logs
+        logging.getLogger("asyncio").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
 
         self.instance = logger
 
