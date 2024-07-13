@@ -15,7 +15,7 @@ def get_testnet_tokens(receiver: str):
     Returns:
         String explaining what happened"""
 
-def get_testnet_tokens_raw(receiver: str) -> str:
+async def get_testnet_tokens_raw(receiver: str) -> str:
     response = requests.post(
         "https://near-faucet.io/api/faucet/tokens",
         json={"contractId":"near_faucet","receiverId": receiver,"amount":"10000000000000000000000000"}
@@ -36,7 +36,7 @@ def google_search(query: str):
     Returns:
         list: A list of dictionaries containing the title, link, snippet, and other information about the search results."""
 
-def google_search_raw(query: str) -> list[dict]:
+async def google_search_raw(query: str) -> list[dict]:
     basic_auth = HTTPBasicAuth(env.oxylabs_username, env.oxylabs_password)
 
     response = requests.post(
