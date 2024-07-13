@@ -60,11 +60,13 @@ async def mint_near_nft_raw(receiver: str) -> str:
     account = Account(env.near_account_id, env.near_account_private_key, env.near_rpc_url)
     await account.startup()
 
+    existing_nfts = await account.view_function(env.near_account_id, "nft_tokens", {})
+
     result = await account.function_call(
-        "nearaibot.testnet",
+        env.near_account_id,
         "nft_mint",
         {
-            "token_id": "2",
+            "token_id": str(len(existing_nfts.result)),  # Generating a new ID incrementally
             "receiver_id": receiver,
             "token_metadata": {
             "title": "AI NFT",
