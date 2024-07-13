@@ -13,7 +13,7 @@ aiohttp = "^3.9.5"
 pydantic = "^2.8.2"
 nltk = "^3.8.1"
 langchain = "^0.2.7"
-
+py-near = { git = "git@github.com:RezaRahemtola/py-near.git" }
 
 [build-system]
 requires = ["poetry-core"]

@@ -105,7 +105,7 @@ class Agent:
 
                 if len(tool_calls) > 0:
                     yield "Gathering some information to help you..."
-                tool_message = self.tools_handler.complete(tool_calls, self.max_recurse_depth)
+                tool_message = await self.tools_handler.complete(tool_calls, self.max_recurse_depth)
             except Exception as e:
                 logger.warn(f"An error occured on tools completion {e}")
                 raise e

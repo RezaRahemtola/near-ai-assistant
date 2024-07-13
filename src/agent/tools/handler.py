@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import Callable, Any, Awaitable
 
 from logger import logger
 from .functions import get_tools
@@ -33,7 +34,7 @@ class ToolsHandler:
 
         return tool_calls
 
-    def execute_tool_call(self, tool_call: dict) -> str:
+    async def execute_tool_call(self, tool_call: dict) -> str:
         function_name = tool_call.get("name")
         # TODO: Not working without this _raw, try to fix it later
         function_to_call = getattr(functions, f"{function_name}_raw", None)
@@ -43,16 +44,16 @@ class ToolsHandler:
         if not function_to_call:
             raise ValueError(f"Function {function_name} not found")
 
-        function_response = function_to_call(*function_args.values())
+        function_response = await function_to_call(*function_args.values())
         results = f'{{"name": "{function_name}", "content": {function_response}}}'
         return results
 
-    def complete(self, tool_calls: list[dict], depth: int) -> str | None:
+    async def complete(self, tool_calls: list[dict], depth: int) -> str | None:
         tool_message = f"Current call depth: {depth}{self.line_separator}"
         if len(tool_calls) > 0:
             for tool_call in tool_calls:
                 try:
-                    function_response = self.execute_tool_call(tool_call)
+                    function_response = await self.execute_tool_call(tool_call)
                     tool_message += f"<tool_response>{self.line_separator}{function_response}{self.line_separator}</tool_response>{self.line_separator}"
                 except Exception as e:
                     tool_name = tool_call.get("name")
