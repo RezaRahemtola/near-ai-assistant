@@ -29,7 +29,4 @@ async def handle_message(sid, question: str):
 
 
 if __name__ == '__main__':
-    try:
-        web.run_app(app, host='0.0.0.0', port=3001)
-    except KeyboardInterrupt:
-        pass
+    web.run_app(app, host='0.0.0.0', port=3001)

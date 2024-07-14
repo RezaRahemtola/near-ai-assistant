@@ -1,6 +1,7 @@
 import aiohttp
 
 from logger import logger
+from config import env
 from .prompt import PromptGenerator
 from .tools import ToolsHandler
 from .utils import calculate_token_length
@@ -103,7 +104,7 @@ class Agent:
             try:
                 tool_calls = self.tools_handler.extract_tool_calls(completion)
 
-                if len(tool_calls) > 0:
+                if len(tool_calls) > 0 and env.debug:
                     yield "Gathering some information to help you..."
                 tool_message = await self.tools_handler.complete(tool_calls, self.max_recurse_depth)
             except Exception as e:
@@ -127,4 +128,5 @@ class Agent:
 
                 logger.debug(f"Agent::yield_response: doing recursion on prompt: {prompt}")
 
-                yield "Processing the gathered information..."
+                if env.debug:
+                    yield "Processing the gathered information..."
