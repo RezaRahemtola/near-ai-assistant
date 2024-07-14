@@ -81,7 +81,11 @@ export default function App() {
 												<div className="d-flex flex-row justify-content-end mb-4 pt-1" key={messageGroup.id}>
 													<div>
 														{messageGroup.messages.map((message) => (
-															<p className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary" key={message.id}>
+															<p
+																className="small p-2 me-3 mb-1 text-white rounded-3 bg-primary"
+																key={message.id}
+																style={{ whiteSpace: "pre-line" }}
+															>
 																{message.content}
 															</p>
 														))}
@@ -106,7 +110,7 @@ export default function App() {
 													{messageGroup.messages.map((message) => (
 														<p
 															className="small p-2 ms-3 mb-1 rounded-3"
-															style={{ backgroundColor: "#f5f6f7" }}
+															style={{ backgroundColor: "#f5f6f7", whiteSpace: "pre-line" }}
 															key={message.id}
 														>
 															{message.content}
