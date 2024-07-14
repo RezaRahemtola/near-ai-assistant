@@ -92,7 +92,7 @@ export default function App() {
 													</div>
 													<img
 														src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-														alt="avatar 1"
+														alt="avatar user"
 														style={{ width: "45px", height: "100%" }}
 													/>
 												</div>
@@ -102,8 +102,8 @@ export default function App() {
 										return (
 											<div className="d-flex flex-row justify-content-start mb-4" key={messageGroup.id}>
 												<img
-													src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-													alt="avatar 1"
+													src="https://img.freepik.com/free-vector/chatbot-chat-message-vectorart_78370-4104.jpg"
+													alt="avatar AI"
 													style={{ width: "45px", height: "100%" }}
 												/>
 												<div>
