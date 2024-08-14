@@ -1,6 +1,7 @@
-# 🇧🇪 ETHGlobal Brussels 2024 - Near AI Assistant
+# 🇧🇪 ETHGlobal Brussels 2024 - [Near AI Assistant](https://ethglobal.com/showcase/near-ai-assistant-jmwgf)
 
 This project aims to provide a one-stop AI chatbot to discover the [Near](https://near.org/) ecosystem 🚀
+It was built during the ETHGlobal Brussels 2024 hackathon and won the Near prizes in the AI track.
 
 It features an AI agent using an open-source model running on the [Aleph.im](https://aleph.im/) decentralized cloud, and a basic frontend to simplify interactions with it.
 
@@ -15,7 +16,7 @@ The agent has access to several functions to serve requests about Near as best a
 - What are the different transaction actions on Near?
 - Can I please have an ETHGlobal Brussels NFT sent to me at rezarah.testnet? Thanks
 - I want to start using Near, can you send me some tokens on my testnet address random.testnet?
-- I don't understand what this transaction is doing, can you help me? The transaction hash is `hash` and it was send by someone.testnet.
+- I don't understand what this transaction is doing, can you help me? The transaction hash is `hash` and it was sent by someone.testnet.
 
 ## ⚙️ Installation
 
@@ -74,7 +75,7 @@ As a hackathon project built in solo, this is obviously not finished and can be 
 
 Other things I have used / fixed related to Near during this hackathon
 
-- Made a fork of [py-near](https://github.com/pvolnov/py-near), based on [another fork](https://github.com/pinnace/py-near) that was solving some [dependencies issues](https://github.com/pvolnov/py-near/issues/18): https://github.com/RezaRahemtola/py-near\
+- Made a fork of [py-near](https://github.com/pvolnov/py-near), based on [another fork](https://github.com/pinnace/py-near) that was solving some [dependencies issues](https://github.com/pvolnov/py-near/issues/18): [https://github.com/RezaRahemtola/py-near](https://github.com/RezaRahemtola/py-near)\
 This allowed me to use the latest version of `py-near` without the dependency issues from the base project.
 > 🧠 I found this `py-near` package really cool (great typing) and useful, but to be perfect a few things are missing imho:
 >  - Add it to the `near` organization and maintain it if possible, currently there is an [outdated API package there](https://github.com/near/near-api-py) linking to `py-near`. Having someone maintaining it would avoid this "fork of a fork of a replacement of `near-api-py`" that I had to made
