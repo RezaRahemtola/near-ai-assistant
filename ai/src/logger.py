@@ -8,7 +8,7 @@ class _Logger:
     def __init__(self, debug=False):
         logger = logging.getLogger(__name__)
 
-        logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
         # Hide other debug logs
         logging.getLogger("asyncio").setLevel(logging.WARNING)
         logging.getLogger("urllib3").setLevel(logging.WARNING)

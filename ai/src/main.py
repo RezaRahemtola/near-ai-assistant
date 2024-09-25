@@ -1,6 +1,6 @@
 import socketio
-from aiohttp import web
 
+from aiohttp import web
 from agent.agent import Agent
 from logger import logger
 from config import env
