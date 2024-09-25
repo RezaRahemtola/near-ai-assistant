@@ -23,5 +23,5 @@ chat_ml:
   stop_sequences:
     - "<|im_end|>"
     - "<|endoftext|>"
-    - "</assistant"
-    - "</user"
+    - "</assistant>"
+    - "</user>"

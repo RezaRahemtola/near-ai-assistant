@@ -4,8 +4,6 @@ from logger import logger
 from config import env
 from .prompt import PromptGenerator
 from .tools import ToolsHandler
-from .utils import calculate_token_length
-
 
 class Agent:
     def __init__(self, config: dict):
@@ -70,7 +68,7 @@ class Agent:
                         response_data = await response.json()
                         result = response_data["content"]
                         full_result = f"{full_result}{result}"
-                        token_count = calculate_token_length(full_result)
+                        token_count = len(full_result.split(" "))
                         await session.close()
                         return full_result, token_count
                     else:
