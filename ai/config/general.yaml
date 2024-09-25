@@ -4,7 +4,7 @@ model:
   api_url: "http://localhost:8080/completion"
   # api_url: "https://curated.aleph.cloud/vm/84df52ac4466d121ef3bb409bb14f315de7be4ce600e8948d71df6485aa5bcc3/completion"
 
-  max_prompt_tokens: 32768
+  max_prompt_tokens: 16384
   max_completion_tokens: 700
   temperature: 0.7
   top_p: 0.9
